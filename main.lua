@@ -20,6 +20,21 @@ local function terminalListener()
             print("Exiting program.")
             term.setTextColor(colors.white)
             return 
+        elseif input == "logs" then
+            local logs = discord.getLogs()
+            if #logs == 0 then
+                print("No logs available.")
+            else
+                print("Recent Logs:")
+                for i = math.max(1, #logs - 9), #logs do
+                    local log = logs[i]
+                    if log.type == "received" then
+                        print(string.format("[RECEIVED] %s: %s", log.user, log.content))
+                    elseif log.type == "message" then
+                        print(string.format("[SENT] %s", log.content))
+                    elseif log.type == "embed" then
+                        print(string.format("[EMBED] %s: %s", log.title, log.description))
+                    end
         elseif input ~= "" then
             print("Unknown command: " .. input)
         end

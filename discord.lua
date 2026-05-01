@@ -4,6 +4,8 @@ local bot_token = "Bot " .. config.token
 local channel_id = config.channel_id
 local last_message_id = ""
 
+local logs = {}
+
 local function sendEmbed(title, description, reply_to_id)
     local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages"
     local payload = {
@@ -16,6 +18,7 @@ local function sendEmbed(title, description, reply_to_id)
         ["Content-Type"] = "application/json",
     })
     if response then response.close() end
+    logs[#logs + 1] = { type = "embed", title = title, description = description }
 end
 
 local function sendMessage(content, reply_to_id)
@@ -28,6 +31,7 @@ local function sendMessage(content, reply_to_id)
         ["Content-Type"] = "application/json",
     })
     if response then response.close() end
+    logs[#logs + 1] = { type = "message", content = content }
 end
 
 local function getLatestMessage()
@@ -41,6 +45,7 @@ local function getLatestMessage()
             local msg = data[1]
             if msg.id ~= last_message_id and not (msg.author and msg.author.bot) then
                 last_message_id = msg.id
+                logs[#logs + 1] = { type = "received", user = msg.author.username, content = msg.content }
                 return msg.author.username, msg.content, msg.id
             end
         end
@@ -62,8 +67,13 @@ local function runBot()
     end
 end
 
+local function getLogs()
+    return logs
+end
+
 return {
     runBot = runBot,
     sendEmbed = sendEmbed,
     sendMessage = sendMessage,
+    getLogs = getLogs,
 }
