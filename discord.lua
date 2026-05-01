@@ -102,3 +102,9 @@ local function init()
 		sleep(3)
 	end
 end
+
+return {
+    init = init,
+    sendEmbed = sendEmbed,
+    sendMessage = sendMessage,
+}

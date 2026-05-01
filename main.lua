@@ -1,6 +1,6 @@
 print("Andreas' Farm System initializing...")
 
-local discord = require("discord")
+local discord = loadfile("discord.lua")()
 
 parallel.waitForAny(discord.init)
 
