@@ -35,6 +35,8 @@ local function terminalListener()
                     elseif log.type == "embed" then
                         print(string.format("[EMBED] %s: %s", log.title, log.description))
                     end
+                end
+            end
         elseif input ~= "" then
             print("Unknown command: " .. input)
         end
