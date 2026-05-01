@@ -6,6 +6,42 @@ local bot_token = "Bot ".. token
 local channel_id = config.channel_id
 local last_message_id = ""
 
+local function sendEmbed(title, description, reply_to_id)
+    local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages"
+    
+    local payload = {
+        embeds = {
+            {
+                title = title,
+                description = description,
+                color = 0x00FF00
+            }
+        }
+    }
+
+    if reply_to_id then
+        payload.message_reference = {
+            message_id = reply_to_id
+        }
+    end
+
+    local response = http.post(
+        url,
+        textutils.serializeJSON(payload),
+        {
+            ["Authorization"] = bot_token,
+            ["Content-Type"] = "application/json"
+        }
+    )
+
+    if response then
+        print("Sent embed: " .. title)
+        response.close()
+    else
+        print("Failed to send embed.")
+    end
+end
+
 local function sendMessage(content, reply_to_id)
     local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages"
     
@@ -67,6 +103,9 @@ while true do
         
         if text == "!ping" then
             sendMessage("pong!", id)
+        end
+        if text == "!embed" then
+            sendEmbed("Hello!", "This is an embed message.", id)
         end
     end
     sleep(3) 
