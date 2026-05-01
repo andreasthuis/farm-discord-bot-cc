@@ -1,23 +1,22 @@
-print("Andreas' Farm System initializing...")
-
+-- startup.lua
 local discord = loadfile("discord.lua")()
 
-parallel.waitForAny(discord.init)
+print("Andreas' Farm System initializing...")
 
-print("Initialization complete. Starting main loop...")
-
-function listenForCommand()
-    local input = read()
-    if input == "status" then
-        print("Farm status: All systems operational.")
-    elseif input == "exit" then
-        print("Exiting program.")
-        os.exit()
-    else
-        print("Unknown command: " .. input)
+local function terminalListener()
+    while true do
+        write("> ")
+        local input = read()
+        if input == "status" then
+            print("Farm status: All systems operational.")
+        elseif input == "exit" then
+            print("Exiting program.")
+            return
+        else
+            print("Unknown command: " .. input)
+        end
     end
 end
 
-while true do
-    listenForCommand()
-end
+print("Initialization complete.")
+parallel.waitForAny(discord.runBot, terminalListener)
