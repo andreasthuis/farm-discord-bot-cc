@@ -3,7 +3,7 @@ local bot_token = "Bot " .. config.token
 local channel_id = config.channel_id
 local last_message_id = ""
 
-local _G.bot_logs = {}
+_G.bot_logs = _G.bot_logs or {}
 
 local commands
 local function getCommands()
