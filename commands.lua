@@ -4,6 +4,12 @@ local function getDiscord()
     return discord
 end
 
+local commands
+local function getCommands()
+    commands = commands or loadfile("commands.lua")()
+    return commands
+end
+
 local function concatTable(t, sep)
     local result = ""
     for i, v in ipairs(t) do
@@ -64,7 +70,7 @@ local commands = {
         permissions = {"pc", "discord"},
         action = function()
             local commandList = {"Available Commands:"}
-            for cmd, info in pairs(commands) do
+            for cmd, info in pairs(getCommands()) do
                 table.insert(commandList, string.format("%s: %s available on %s", cmd, info.description, concatTable(info.permissions, ", ")))
             end
             sleep(0)
