@@ -24,7 +24,7 @@ local function terminalListener()
 
 		local command = commands[input]
 		if command and has_value(command.permissions, "pc") then
-			local result = command.action()
+			local result = command.action("pc")
 			print(result)
 			if command == commands.exit then
 				break

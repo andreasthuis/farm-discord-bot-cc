@@ -101,7 +101,7 @@ local function runBot()
 			local command = commands[commandName]
 
 			if command and has_value(command.permissions, "discord") then
-				local result = command.action()
+				local result = command.action("discord")
 				sendMessage(result, id)
 			else
 				sendMessage("Unknown command. Type '!list' to see available commands.", id)

@@ -21,6 +21,16 @@ local function concatTable(t, sep)
 	return result
 end
 
+local function has_value(tab, val)
+	for index, value in ipairs(tab) do
+		if value == val then
+			return true
+		end
+	end
+	return false
+end
+
+
 local commands = {
 	status = {
 		description = "Check the status of the farm system.",
@@ -70,14 +80,15 @@ local commands = {
 	list = {
 		description = "List all available commands.",
 		permissions = { "pc", "discord" },
-		action = function()
+		action = function(platform)
 			local commandList = { "Available Commands:" }
+
 			for cmd, info in pairs(getCommands()) do
-				table.insert(
-					commandList,
-					string.format("%s: %s available on %s", cmd, info.description, concatTable(info.permissions, ", "))
-				)
+				if has_value(info.permissions, platform) then
+					table.insert(commandList, string.format("!%s: %s", cmd, info.description))
+				end
 			end
+
 			sleep(0)
 			return concatTable(commandList, "\n")
 		end,
