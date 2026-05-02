@@ -30,13 +30,16 @@ local function has_value(tab, val)
 	return false
 end
 
-
 local commands = {
 	status = {
 		description = "Check the status of the farm system.",
 		permissions = { "pc", "discord" },
-		action = function()
-			return "Farm status: All systems operational."
+		action = function(platform)
+			local msg = "All systems operational."
+			if platform == "discord" then
+				return { title = "Farm Status", description = msg, color = 65280 }, "embed"
+			end
+			return "Farm status: " .. msg
 		end,
 	},
 	logs = {
@@ -81,19 +84,23 @@ local commands = {
 		description = "List all available commands.",
 		permissions = { "pc", "discord" },
 		action = function(platform)
-			local commandList = { "Available Commands:" }
-
+			local commandList = {}
 			for cmd, info in pairs(getCommands()) do
 				if has_value(info.permissions, platform) then
-                    if platform == "discord" then
-                        cmd = "!" .. cmd
-                    end
-					table.insert(commandList, string.format("%s: %s", cmd, info.description))
+					local name = (platform == "discord") and ("!" .. cmd) or cmd
+					table.insert(commandList, string.format("`%s` - %s", name, info.description))
 				end
 			end
 
-			sleep(0)
-			return concatTable(commandList, "\n")
+			if platform == "discord" then
+				return {
+					title = "Command List",
+					description = table.concat(commandList, "\n"),
+					color = 10181046,
+				},
+					"embed"
+			end
+			return "Available Commands:\n" .. table.concat(commandList, "\n")
 		end,
 	},
 }
