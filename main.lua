@@ -24,6 +24,9 @@ local function terminalListener()
         if command and has_value(command.permissions, "pc") then
             local result = command.action()
             print(result)
+            if command == commands.exit then
+                break
+            end
         else
             print("Unknown command. Type 'list' to see available commands.")
         end
