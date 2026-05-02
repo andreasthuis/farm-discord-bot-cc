@@ -45,7 +45,7 @@ local commands = {
 		action = function()
 			local logs = getDiscord().getLogs()
 			if #logs == 0 then
-				return logs
+				return string.format("No logs available. %s", logs)
 			else
 				local logMessages = { "Recent Logs:" }
 				for i = math.max(1, #logs - 9), #logs do

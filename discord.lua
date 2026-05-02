@@ -3,7 +3,7 @@ local bot_token = "Bot " .. config.token
 local channel_id = config.channel_id
 local last_message_id = ""
 
-local logs = {}
+local _G.bot_logs = {}
 
 local commands
 local function getCommands()
@@ -36,9 +36,9 @@ local function sendEmbed(title, description, reply_to_id)
 	if response then
 		response.close()
 	end
-	logs[#logs + 1] = { type = "embed", title = title, description = description }
-	if #logs > 100 then
-		table.remove(logs, 1)
+	_G.bot_logs[#_G.bot_logs + 1] = { type = "embed", title = title, description = description }
+	if #_G.bot_logs > 100 then
+		table.remove(_G.bot_logs, 1)
 	end
 	sleep(0)
 end
@@ -57,9 +57,9 @@ local function sendMessage(content, reply_to_id)
 	if response then
 		response.close()
 	end
-	logs[#logs + 1] = { type = "message", content = content }
-	if #logs > 100 then
-		table.remove(logs, 1)
+	_G.bot_logs[#_G.bot_logs + 1] = { type = "message", content = content }
+	if #_G.bot_logs > 100 then
+		table.remove(_G.bot_logs, 1)
 	end
 	sleep(0)
 end
@@ -75,9 +75,9 @@ local function getLatestMessage()
 			local msg = data[1]
 			if msg.id ~= last_message_id and not (msg.author and msg.author.bot) then
 				last_message_id = msg.id
-				logs[#logs + 1] = { type = "received", user = msg.author.username, content = msg.content }
-				if #logs > 100 then
-					table.remove(logs, 1)
+				_G.bot_logs[#_G.bot_logs + 1] = { type = "received", user = msg.author.username, content = msg.content }
+				if #_G.bot_logs > 100 then
+					table.remove(_G.bot_logs, 1)
 				end
 				sleep(0)
 				return msg.author.username, msg.content, msg.id
@@ -113,7 +113,7 @@ local function runBot()
 end
 
 local function getLogs()
-	return logs
+	return _G.bot_logs
 end
 
 return {
