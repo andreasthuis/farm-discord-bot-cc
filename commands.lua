@@ -63,3 +63,5 @@ local commands = {
         end
     }
 }
+
+return commands
