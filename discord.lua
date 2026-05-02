@@ -5,6 +5,12 @@ local last_message_id = ""
 
 local logs = {}
 
+local commands
+local function getCommands()
+    commands = commands or loadfile("commands.lua")()
+    return commands
+end
+
 local function sendEmbed(title, description, reply_to_id)
     local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages"
     local payload = {
@@ -15,9 +21,11 @@ local function sendEmbed(title, description, reply_to_id)
     local response = http.post(url, textutils.serializeJSON(payload), {
         ["Authorization"] = bot_token,
         ["Content-Type"] = "application/json",
-    }, 5)
+    }, 1)
     if response then response.close() end
     logs[#logs + 1] = { type = "embed", title = title, description = description }
+    if #logs > 100 then table.remove(logs, 1) end
+    sleep(0)
 end
 
 local function sendMessage(content, reply_to_id)
@@ -28,14 +36,16 @@ local function sendMessage(content, reply_to_id)
     local response = http.post(url, textutils.serializeJSON(payload), {
         ["Authorization"] = bot_token,
         ["Content-Type"] = "application/json",
-    }, 5)
+    }, 1)
     if response then response.close() end
     logs[#logs + 1] = { type = "message", content = content }
+    if #logs > 100 then table.remove(logs, 1) end
+    sleep(0)
 end
 
 local function getLatestMessage()
     local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages?limit=1"
-    local response = http.get(url, { ["Authorization"] = bot_token }, 5)
+    local response = http.get(url, { ["Authorization"] = bot_token }, 1)
 
     if response then
         local data = textutils.unserializeJSON(response.readAll())
@@ -45,10 +55,13 @@ local function getLatestMessage()
             if msg.id ~= last_message_id and not (msg.author and msg.author.bot) then
                 last_message_id = msg.id
                 logs[#logs + 1] = { type = "received", user = msg.author.username, content = msg.content }
+                if #logs > 100 then table.remove(logs, 1) end
+                sleep(0)
                 return msg.author.username, msg.content, msg.id
             end
         end
     end
+    sleep(0)
     return nil
 end
 
@@ -56,13 +69,15 @@ local function runBot()
     while true do
         local user, text, id = getLatestMessage()
         if user then
-            if text == "!ping" then
-                sendMessage("pong!", id)
-            elseif text == "!status" then
-                sendEmbed("Farm Status", "All systems operational. (Checked via Discord)", id)
+            local commands = getCommands()
+            local command = commands[text]
+            if command and has_value(command.permissions, "discord") then
+                local result = command.action()
+                sendMessage(result, id)
+            else
+                sendMessage("Unknown command. Type 'list' to see available commands.", id)
             end
         end
-        sleep(0)
         sleep(2)
     end
 end

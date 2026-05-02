@@ -1,5 +1,8 @@
-local discord = loadfile("discord.lua")()
-local main = loadfile("main.lua")()
+local discord
+local function getDiscord()
+    discord = discord or loadfile("discord.lua")()
+    return discord
+end
 
 local commands = {
     status = {
@@ -13,7 +16,7 @@ local commands = {
         description = "View recent logs from the Discord bot.",
         permissions = {"pc", "discord"},
         action = function()
-            local logs = discord.getLogs()
+            local logs = getDiscord().getLogs()
             if #logs == 0 then
                 return "No logs available."
             else
@@ -28,6 +31,7 @@ local commands = {
                         table.insert(logMessages, string.format("[EMBED] %s: %s", log.title, log.description))
                     end
                 end
+                sleep(0)
                 return table.concat(logMessages, "\n")
             end
         end
@@ -54,6 +58,7 @@ local commands = {
             for cmd, info in pairs(commands) do
                 table.insert(commandList, string.format("%s: %s available on %s", cmd, info.description, table.concat(info.permissions, ", ")))
             end
+            sleep(0)
             return table.concat(commandList, "\n")
         end
     }
