@@ -41,7 +41,7 @@ local commands = {
 	},
 	logs = {
 		description = "View recent logs from the Discord bot.",
-		permissions = { "pc", "discord" },
+		permissions = { "pc" },
 		action = function()
 			local logs = getDiscord().getLogs()
 			if #logs == 0 then
@@ -59,7 +59,7 @@ local commands = {
 					end
 				end
 				sleep(0)
-				return table.concat(logMessages, "\n"), "embed"
+				return table.concat(logMessages, "\n")
 			end
 		end,
 	},
