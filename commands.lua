@@ -4,6 +4,15 @@ local function getDiscord()
     return discord
 end
 
+local function concatTable(t, sep)
+    local result = ""
+    for i, v in ipairs(t) do
+        result = result .. v
+        if i < #t then result = result .. sep end
+    end
+    return result
+end
+
 local commands = {
     status = {
         description = "Check the status of the farm system.",
@@ -56,10 +65,10 @@ local commands = {
         action = function()
             local commandList = {"Available Commands:"}
             for cmd, info in pairs(commands) do
-                table.insert(commandList, string.format("%s: %s available on %s", cmd, info.description, table.concat(info.permissions, ", ")))
+                table.insert(commandList, string.format("%s: %s available on %s", cmd, info.description, concatTable(info.permissions, ", ")))
             end
             sleep(0)
-            return table.concat(commandList, "\n")
+            return concatTable(commandList, "\n")
         end
     }
 }
