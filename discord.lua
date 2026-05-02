@@ -36,7 +36,7 @@ local function sendMessage(content, reply_to_id)
     local response = http.post(url, textutils.serializeJSON(payload), {
         ["Authorization"] = bot_token,
         ["Content-Type"] = "application/json",
-    }, 1)
+    })
     if response then response.close() end
     logs[#logs + 1] = { type = "message", content = content }
     if #logs > 100 then table.remove(logs, 1) end
@@ -45,7 +45,7 @@ end
 
 local function getLatestMessage()
     local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages?limit=1"
-    local response = http.get(url, { ["Authorization"] = bot_token }, 1)
+    local response = http.get(url, { ["Authorization"] = bot_token })
 
     if response then
         local data = textutils.unserializeJSON(response.readAll())

@@ -7,7 +7,7 @@ local raw_url = ("https://raw.githubusercontent.com/%s/%s/%s/"):format(user, rep
 
 print("Fetching file list from GitHub...")
 
-local response = http.get(api_url, {}, 5)
+local response = http.get(api_url, {})
 if not response then
     error("Could not connect to GitHub API. Check your username/repo.")
 end
@@ -19,7 +19,7 @@ for _, file in ipairs(files) do
     if file.type == "file" and file.name:match("%.lua$") and file.name ~= "config.lua" then
         print("Downloading: " .. file.name)
         
-        local fResp = http.get(raw_url .. file.name, {}, 10)
+        local fResp = http.get(raw_url .. file.name, {})
         if fResp then
             local f = fs.open(file.name, "w")
             f.write(fResp.readAll())
