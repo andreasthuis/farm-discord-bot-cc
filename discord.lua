@@ -1,4 +1,3 @@
--- discord.lua
 local config = loadfile("config.lua")()
 local bot_token = "Bot " .. config.token
 local channel_id = config.channel_id
