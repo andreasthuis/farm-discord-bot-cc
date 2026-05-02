@@ -3,6 +3,13 @@ local commands = loadfile("commands.lua")()
 
 print("Andreas' Farm System initializing...")
 
+local function has_value(tab, val)
+    for index, value in ipairs(tab) do
+        if value == val then return true end
+    end
+    return false
+end
+
 local function terminalListener()
     while true do
         term.setTextColor(colors.blue)
@@ -14,7 +21,7 @@ local function terminalListener()
         term.setTextColor(colors.yellow)
         
         local command = commands[input]
-        if command and table.contains(command.permissions, "pc") then
+        if command and has_value(command.permissions, "pc") then
             local result = command.action()
             print(result)
         else
@@ -22,7 +29,9 @@ local function terminalListener()
         end
         
         term.setTextColor(colors.white)
+        sleep(0)
     end
 end
+
 print("Initialization complete.")
-parallel.waitForAny(discord.runBot, terminalListener)
+parallel.waitForAll(discord.runBot, terminalListener)

@@ -15,7 +15,7 @@ local function sendEmbed(title, description, reply_to_id)
     local response = http.post(url, textutils.serializeJSON(payload), {
         ["Authorization"] = bot_token,
         ["Content-Type"] = "application/json",
-    })
+    }, 5)
     if response then response.close() end
     logs[#logs + 1] = { type = "embed", title = title, description = description }
 end
@@ -28,14 +28,14 @@ local function sendMessage(content, reply_to_id)
     local response = http.post(url, textutils.serializeJSON(payload), {
         ["Authorization"] = bot_token,
         ["Content-Type"] = "application/json",
-    })
+    }, 5)
     if response then response.close() end
     logs[#logs + 1] = { type = "message", content = content }
 end
 
 local function getLatestMessage()
     local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages?limit=1"
-    local response = http.get(url, { ["Authorization"] = bot_token })
+    local response = http.get(url, { ["Authorization"] = bot_token }, 5)
 
     if response then
         local data = textutils.unserializeJSON(response.readAll())
@@ -62,6 +62,7 @@ local function runBot()
                 sendEmbed("Farm Status", "All systems operational. (Checked via Discord)", id)
             end
         end
+        sleep(0)
         sleep(2)
     end
 end
