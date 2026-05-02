@@ -11,6 +11,13 @@ local function getCommands()
     return commands
 end
 
+local function has_value(tab, val)
+    for index, value in ipairs(tab) do
+        if value == val then return true end
+    end
+    return false
+end
+
 local function sendEmbed(title, description, reply_to_id)
     local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages"
     local payload = {
