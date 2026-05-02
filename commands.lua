@@ -45,7 +45,7 @@ local commands = {
 		action = function()
 			local logs = getDiscord().getLogs()
 			if #logs == 0 then
-				return "No logs available."
+				return logs
 			else
 				local logMessages = { "Recent Logs:" }
 				for i = math.max(1, #logs - 9), #logs do
@@ -59,7 +59,7 @@ local commands = {
 					end
 				end
 				sleep(0)
-				return table.concat(logMessages, "\n")
+				return table.concat(logMessages, "\n"), "embed"
 			end
 		end,
 	},
@@ -74,7 +74,7 @@ local commands = {
 		description = "Check if the bot is responsive.",
 		permissions = { "discord" },
 		action = function()
-			return "Pong! The bot is responsive."
+			return "pong!"
 		end,
 	},
 	list = {
@@ -85,7 +85,10 @@ local commands = {
 
 			for cmd, info in pairs(getCommands()) do
 				if has_value(info.permissions, platform) then
-					table.insert(commandList, string.format("!%s: %s", cmd, info.description))
+                    if platform == "discord" then
+                        cmd = "!" .. cmd
+                    end
+					table.insert(commandList, string.format("%s: %s", cmd, info.description))
 				end
 			end
 
