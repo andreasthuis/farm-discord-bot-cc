@@ -38,5 +38,10 @@ local function terminalListener()
 	end
 end
 
-print("Initialization complete.")
-parallel.waitForAny(discord.runBot, terminalListener)
+local function init()
+	print("Initialization complete.")
+	parallel.waitForAny(discord.runBot, terminalListener)
+end
+
+init()
+return init

@@ -32,7 +32,7 @@ local function sendEmbed(title, description, reply_to_id)
 	local response = http.post(url, textutils.serializeJSON(payload), {
 		["Authorization"] = bot_token,
 		["Content-Type"] = "application/json",
-	}, 1)
+	})
 	if response then
 		response.close()
 	end
