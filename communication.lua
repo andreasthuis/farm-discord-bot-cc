@@ -20,7 +20,7 @@ function coms.init()
 	print("Rednet opened on: " .. modemSide)
 end
 
-function coms.sendMessage(message)
+function coms.send(message)
 	rednet.broadcast(message)
 end
 
