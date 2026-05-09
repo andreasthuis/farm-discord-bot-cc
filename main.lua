@@ -1,5 +1,9 @@
 local discord = loadfile("discord.lua")()
 local commands = loadfile("commands.lua")()
+local config = loadfile("config.lua")()
+local communication = loadfile("communication.lua")()
+local farms = loadfile("farms.lua")()
+local storage = loadfile("storage.lua")
 
 print("Andreas' Farm System initializing...")
 
@@ -40,7 +44,18 @@ end
 
 local function init()
 	print("Initialization complete.")
-	parallel.waitForAny(discord.runBot, terminalListener)
+	if config.mode == "host" then
+		print("listening for farm connections...")
+		parallel.waitForAny(discord.runBot, terminalListener)
+	elseif config.mode == "farm" then
+		while true do
+			local inventory = storage()
+			communication.send("update_inventory", inventory)
+		end
+	else
+		print("Invalid mode in config. Please set mode to 'host' or 'farm'.")
+		return
+	end
 end
 
 init()
