@@ -30,3 +30,5 @@ function coms.listen()
 		print(string.format("Received from %d: %s (Protocol: %s)", senderId, message, protocol))
 	end
 end
+
+return coms
