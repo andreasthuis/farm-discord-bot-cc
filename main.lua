@@ -43,6 +43,7 @@ local function terminalListener()
 end
 
 local function init()
+	communication.init()
 	print("Initialization complete.")
 	if config.mode == "host" then
 		print("listening for farm connections...")
