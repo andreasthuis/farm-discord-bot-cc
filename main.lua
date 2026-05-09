@@ -47,11 +47,12 @@ local function init()
 	print("Initialization complete.")
 	if config.mode == "host" then
 		print("listening for farm connections...")
-		parallel.waitForAny(discord.runBot, terminalListener)
+		parallel.waitForAny(discord.runBot, terminalListener, communication.listen)
 	elseif config.mode == "farm" then
 		while true do
 			local inventory = storage()
-			communication.send("update_inventory", inventory)
+			communication.send(inventory)
+			os.sleep(1)
 		end
 	else
 		print("Invalid mode in config. Please set mode to 'host' or 'farm'.")
