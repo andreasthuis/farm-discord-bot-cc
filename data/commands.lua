@@ -10,6 +10,12 @@ local function getCommands()
 	return commands
 end
 
+local farms
+local function getFarms()
+	farms = farms or loadfile("utils/farms.lua")()
+	return farms
+end
+
 local function concatTable(t, sep)
 	local result = ""
 	for i, v in ipairs(t) do
@@ -35,7 +41,19 @@ local commands = {
 		description = "Check the status of the farm system.",
 		permissions = { "pc", "discord" },
 		action = function(platform)
-			local msg = "All systems operational."
+			local farms = getFarms().getFarms()
+			local total = 0
+			local active = 0
+			local time  = os.time()
+			for _, farm in pairs(farms) do
+				if farm.type == "farm" then
+					total = total + 1
+					if time - farm.lastUpdate < 10 then
+						active = active + 1
+					end
+				end
+			end
+			local msg = string.format("Total farms: %d, Active farms: %d", total, active)
 			if platform == "discord" then
 				return { title = "Farm Status", description = msg, color = 65280 }, "embed"
 			end
@@ -101,6 +119,31 @@ local commands = {
 					"embed"
 			end
 			return "Available Commands:\n" .. table.concat(commandList, "\n")
+		end,
+	},
+	farms = {
+		description = "List all connected farms and their status.",
+		permissions = { "discord" },
+		action = function()
+			local farms = getFarms().getFarms()
+			local farmList = {}
+			local time = os.time()
+			for _, farm in pairs(farms) do
+				if farm.type == "farm" then
+					local status = (time - farm.lastUpdate < 10) and "Active" or "Inactive"
+					table.insert(farmList, string.format("**%s** (ID: %d) - %s", farm.name, farm.id, status))
+				end
+			end
+
+			if #farmList == 0 then
+				return "No farms currently connected."
+			end
+
+			return {
+				title = "Connected Farms",
+				description = table.concat(farmList, "\n"),
+				color = 65280,
+			}, "embed"
 		end,
 	},
 }

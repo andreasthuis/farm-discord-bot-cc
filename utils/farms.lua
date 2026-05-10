@@ -17,11 +17,16 @@ function farms.updateFarm(id, data)
     farms.save()
 end
 
+function farms.getFarms()
+    return list
+end
+
 function farms.networkListener()
     while true do
-        local event, senderId, message, protocol = os.pullEvent("rednet_message")
+        local event, senderId, message, protocol, time = os.pullEvent("rednet_message")
         if protocol == "farm_update" then
             local farmData = textutils.unserialize(message)
+            farmData.lastUpdate = time
             if farmData and farmData.id then
                 farms.updateFarm(farmData.id, farmData)
             end
