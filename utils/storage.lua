@@ -1,7 +1,9 @@
 local vault = peripheral.find("inventory")
 
 if not vault then
+    term.setTextColor(colors.red)
     print("Error: No Vault (or inventory) connected!")
+    term.setTextColor(colors.white)
     return
 end
 
@@ -23,11 +25,30 @@ end
 local myItems = getVaultContents()
 
 term.clear()
+term.setCursorPos(1,1)
+
+term.setTextColor(colors.yellow)
 print("Vault Contents:")
-print("----------------")
+term.setTextColor(colors.gray)
+print("--------------------------------")
+
 for name, count in pairs(myItems) do
     local shortName = name:match(":(.+)") or name
-    print(string.format("%-15s : %d", shortName, count))
+    
+    term.setTextColor(colors.lightBlue)
+    write(string.format("%-18s ", shortName))
+    
+    term.setTextColor(colors.gray)
+    write(": ")
+    
+    if count < 64 then
+        term.setTextColor(colors.orange)
+    else
+        term.setTextColor(colors.green)
+    end
+    print(count)
 end
+
+term.setTextColor(colors.white)
 
 return myItems

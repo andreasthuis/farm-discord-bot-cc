@@ -65,5 +65,8 @@ local function init()
 	end
 end
 
-init()
-return init
+if shell then
+	init()
+else
+	return init
+end
