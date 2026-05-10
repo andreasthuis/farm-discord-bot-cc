@@ -1,9 +1,9 @@
-local discord = loadfile("discord.lua")()
-local commands = loadfile("commands.lua")()
+local discord = loadfile("utils/discord.lua")()
+local commands = loadfile("data/commands.lua")()
 local config = loadfile("config.lua")()
-local communication = loadfile("communication.lua")()
-local farms = loadfile("farms.lua")()
-local storage = loadfile("storage.lua")
+local communication = loadfile("utils/communication.lua")()
+local farms = loadfile("data/farms.lua")()
+local storage = loadfile("utils/storage.lua")
 
 print("Andreas' Farm System initializing...")
 

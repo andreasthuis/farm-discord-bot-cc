@@ -1,12 +1,12 @@
 local discord
 local function getDiscord()
-	discord = discord or loadfile("discord.lua")()
+	discord = discord or loadfile("utils/discord.lua")()
 	return discord
 end
 
 local commands
 local function getCommands()
-	commands = commands or loadfile("commands.lua")()
+	commands = commands or loadfile("data/commands.lua")()
 	return commands
 end
 
