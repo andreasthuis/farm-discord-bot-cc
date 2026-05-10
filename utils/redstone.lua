@@ -7,7 +7,7 @@ local function isValidSide(side)
     return false
 end
 
-local function getSide()
+function link.getSide()
     local sides = redstone.getSides()
     local side = sides[1]
     return side
@@ -19,3 +19,5 @@ function link.setSignal(side, value)
     end
     redstone.setOutput(side, value)
 end
+
+return link
