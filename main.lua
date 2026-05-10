@@ -4,6 +4,7 @@ local config = loadfile("config.lua")()
 local communication = loadfile("utils/communication.lua")()
 local farms = loadfile("utils/farms.lua")()
 local storage = loadfile("utils/storage.lua")
+local red = loadfile("utils/redstone.lua")()
 
 print("Andreas' Farm System initializing...")
 
@@ -49,6 +50,7 @@ local function init()
 		print("listening for farm connections...")
 		parallel.waitForAny(discord.runBot, terminalListener, communication.listen, farms.networkListener)
 	elseif config.mode == "farm" then
+		red.setSignal(red.getSide(), 15)
 		while true do
 			local table = {
 				type = "farm",
