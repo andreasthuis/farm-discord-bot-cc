@@ -50,8 +50,13 @@ local function init()
 		parallel.waitForAny(discord.runBot, terminalListener, communication.listen)
 	elseif config.mode == "farm" then
 		while true do
-			local inventory = storage()
-			communication.send(inventory)
+			local table = {
+				type = "farm",
+				id = os.getComputerID(),
+				name = os.getComputerLabel() or "Unnamed Farm",
+				inventory = storage()
+			}
+			communication.send(textutils.serialize(table), "farm_update")
 			os.sleep(1)
 		end
 	else

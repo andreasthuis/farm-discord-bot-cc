@@ -20,14 +20,14 @@ function coms.init()
 	print("Rednet opened on: " .. modemSide)
 end
 
-function coms.send(message)
-	rednet.broadcast(message)
+function coms.send(message, protocol)
+	rednet.broadcast(message, protocol)
 end
 
 function coms.listen()
 	while true do
 		local senderId, message, protocol = rednet.receive()
-		print(string.format("Received from %d: %s (Protocol: %s)", senderId, message, protocol))
+		os.queueEvent("rednet_message", senderId, message, protocol)
 	end
 end
 
