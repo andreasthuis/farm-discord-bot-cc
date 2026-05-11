@@ -7,7 +7,7 @@ _G.bot_logs = _G.bot_logs or {}
 
 local commands
 local function getCommands()
-	commands = commands or loadfile("utils/commands.lua")()
+	commands = commands or loadfile("data/commands.lua")()
 	return commands
 end
 
