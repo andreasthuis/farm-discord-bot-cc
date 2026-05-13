@@ -15,10 +15,11 @@ function farms.save()
 end
 
 function farms.updateFarm(id, data)
+    local was_new = list[id] == nil
     list[id] = data
-    if os.time() - lastSave > 60 then
+    if was_new or os.time(os.date("*t")) - lastSave > 60 then
         farms.save()
-        lastSave = os.time()
+        lastSave = os.time(os.date("*t"))
     end
 end
 
