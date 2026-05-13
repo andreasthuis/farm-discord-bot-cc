@@ -63,7 +63,7 @@ local function init()
 				inventory = storage()
 			}
 			communication.send(textutils.serialize(table), "farm_update")
-			os.sleep(1)
+			os.sleep(5)
 		end
 	else
 		print("Invalid mode in config. Please set mode to 'host' or 'farm'.")

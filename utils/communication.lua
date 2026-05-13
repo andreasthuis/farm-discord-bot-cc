@@ -27,7 +27,7 @@ end
 function coms.listen()
 	while true do
 		local senderId, message, protocol = rednet.receive()
-		os.queueEvent("rednet_message", senderId, message, protocol, os.time())
+		os.queueEvent("rednet_message", senderId, message, protocol, os.time(os.date("*t")))
 	end
 end
 

@@ -44,7 +44,7 @@ local commands = {
 			local farms = getFarms().getFarms()
 			local total = 0
 			local active = 0
-			local time  = os.time()
+			local time  = os.time(os.date("*t"))
 			for _, farm in pairs(farms) do
 				if farm.type == "farm" then
 					total = total + 1

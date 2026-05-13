@@ -6,6 +6,8 @@ if fs.exists(filePath) then
     list = loadfile(filePath)() or {}
 end
 
+local lastSave = 0
+
 function farms.save()
     local f = fs.open(filePath, "w")
     f.write("return " .. textutils.serialize(list))
@@ -14,7 +16,10 @@ end
 
 function farms.updateFarm(id, data)
     list[id] = data
-    farms.save()
+    if os.time() - lastSave > 60 then
+        farms.save()
+        lastSave = os.time()
+    end
 end
 
 function farms.getFarms()
