@@ -36,6 +36,10 @@ local function has_value(tab, val)
 	return false
 end
 
+local function getCurrentTime()
+	return os.time(os.date("*t"))
+end
+
 local commands = {
 	status = {
 		description = "Check the status of the farm system.",
@@ -44,7 +48,7 @@ local commands = {
 			local farms = getFarms().getFarms()
 			local total = 0
 			local active = 0
-			local time  = os.time(os.date("*t"))
+			local time  = getCurrentTime()
 			for _, farm in pairs(farms) do
 				if farm.type == "farm" then
 					total = total + 1
@@ -127,7 +131,7 @@ local commands = {
 		action = function()
 			local farms = getFarms().getFarms()
 			local farmList = {}
-			local time = os.time()
+			local time = getCurrentTime()
 			for _, farm in pairs(farms) do
 				if farm.type == "farm" then
 					local status = (time - farm.lastUpdate < 10) and "Active" or "Inactive"

@@ -20,6 +20,16 @@ local function has_value(tab, val)
 	return false
 end
 
+local function parseCommand(text, prefix)
+	local raw = text:sub(#prefix + 1)
+	local parts = {}
+	for part in raw:gmatch("%S+") do
+		table.insert(parts, part)
+	end
+	local commandName = table.remove(parts, 1)
+	return commandName, parts
+end
+
 local function sendEmbed(title, description, reply_to_id)
 	local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages"
 	local payload = {
@@ -29,13 +39,17 @@ local function sendEmbed(title, description, reply_to_id)
 		payload.message_reference = { message_id = reply_to_id }
 	end
 
-	local response = http.post(url, textutils.serializeJSON(payload), {
+	local success, response = pcall(http.post, url, textutils.serializeJSON(payload), {
 		["Authorization"] = bot_token,
 		["Content-Type"] = "application/json",
 	})
-	if response then
+	
+	if success and response then
 		response.close()
+	elseif not success then
+		print("[DISCORD] Error sending embed: " .. response)
 	end
+	
 	_G.bot_logs[#_G.bot_logs + 1] = { type = "embed", title = title, description = description }
 	if #_G.bot_logs > 100 then
 		table.remove(_G.bot_logs, 1)
@@ -50,13 +64,17 @@ local function sendMessage(content, reply_to_id)
 		payload.message_reference = { message_id = reply_to_id }
 	end
 
-	local response = http.post(url, textutils.serializeJSON(payload), {
+	local success, response = pcall(http.post, url, textutils.serializeJSON(payload), {
 		["Authorization"] = bot_token,
 		["Content-Type"] = "application/json",
 	})
-	if response then
+	
+	if success and response then
 		response.close()
+	elseif not success then
+		print("[DISCORD] Error sending message: " .. response)
 	end
+	
 	_G.bot_logs[#_G.bot_logs + 1] = { type = "message", content = content }
 	if #_G.bot_logs > 100 then
 		table.remove(_G.bot_logs, 1)
@@ -66,11 +84,24 @@ end
 
 local function getLatestMessage()
 	local url = "https://discord.com/api/v10/channels/" .. channel_id .. "/messages?limit=1"
-	local response = http.get(url, { ["Authorization"] = bot_token })
+	local success, response = pcall(http.get, url, { ["Authorization"] = bot_token })
+
+	if not success then
+		print("[DISCORD] Error fetching messages: " .. response)
+		sleep(0)
+		return nil
+	end
 
 	if response then
-		local data = textutils.unserializeJSON(response.readAll())
+		local parseSuccess, data = pcall(function() return textutils.unserializeJSON(response.readAll()) end)
 		response.close()
+		
+		if not parseSuccess then
+			print("[DISCORD] Error parsing JSON response")
+			sleep(0)
+			return nil
+		end
+		
 		if data and data[1] then
 			local msg = data[1]
 			if msg.id ~= last_message_id and not (msg.author and msg.author.bot) then
@@ -95,13 +126,13 @@ local function runBot()
 		local user, text, id = getLatestMessage()
 
 		if user and text:sub(1, #prefix) == prefix then
-			local commandName = text:sub(#prefix + 1)
+			local commandName, args = parseCommand(text, prefix)
 
 			local commands = getCommands()
 			local command = commands[commandName]
 
 			if command and has_value(command.permissions, "discord") then
-				local success, result, msg_type = pcall(command.action, "discord")
+				local success, result, msg_type = pcall(command.action, "discord", args)
 				if success then
 					if msg_type == "embed" then
 						sendEmbed(result.title, result.description, id)
@@ -109,7 +140,7 @@ local function runBot()
 						sendMessage(result, id)
 					end
 				else
-					print("Error in command " .. commandName .. ": " .. result)
+					print("Error in command " .. (commandName or "unknown") .. ": " .. result)
 					sendMessage("Error executing command: " .. result, id)
 				end
 			else

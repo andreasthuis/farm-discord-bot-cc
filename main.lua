@@ -19,6 +19,20 @@ local function has_value(tab, val)
 	return false
 end
 
+local function splitWords(input)
+	local words = {}
+	for word in (input or ""):gmatch("%S+") do
+		table.insert(words, word)
+	end
+	return words
+end
+
+local function parseCommand(input)
+	local words = splitWords(input)
+	local commandName = table.remove(words, 1)
+	return commandName, words
+end
+
 local function terminalListener()
 	while true do
 		term.setTextColor(colors.blue)
@@ -29,16 +43,17 @@ local function terminalListener()
 
 		term.setTextColor(colors.yellow)
 
-		local command = commands[input]
+		local commandName, args = parseCommand(input)
+		local command = commands[commandName]
 		if command and has_value(command.permissions, "pc") then
-			local success, result = pcall(command.action, "pc")
+			local success, result = pcall(command.action, "pc", args)
 			if success then
 				print(result)
 				if command == commands.exit then
 					break
 				end
 			else
-				print("Error in command " .. input .. ": " .. result)
+				print("Error in command " .. (commandName or input) .. ": " .. result)
 			end
 		else
 			print("Unknown command. Type 'list' to see available commands.")
