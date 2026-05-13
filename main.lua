@@ -31,10 +31,14 @@ local function terminalListener()
 
 		local command = commands[input]
 		if command and has_value(command.permissions, "pc") then
-			local result = command.action("pc")
-			print(result)
-			if command == commands.exit then
-				break
+			local success, result = pcall(command.action, "pc")
+			if success then
+				print(result)
+				if command == commands.exit then
+					break
+				end
+			else
+				print("Error in command " .. input .. ": " .. result)
 			end
 		else
 			print("Unknown command. Type 'list' to see available commands.")

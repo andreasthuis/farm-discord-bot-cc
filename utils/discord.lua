@@ -101,11 +101,16 @@ local function runBot()
 			local command = commands[commandName]
 
 			if command and has_value(command.permissions, "discord") then
-				local result, msg_type = command.action("discord")
-				if msg_type == "embed" then
-					sendEmbed(result.title, result.description, id)
+				local success, result, msg_type = pcall(command.action, "discord")
+				if success then
+					if msg_type == "embed" then
+						sendEmbed(result.title, result.description, id)
+					else
+						sendMessage(result, id)
+					end
 				else
-					sendMessage(result, id)
+					print("Error in command " .. commandName .. ": " .. result)
+					sendMessage("Error executing command: " .. result, id)
 				end
 			else
 				sendMessage("Unknown command. Type '!list' to see available commands.", id)
