@@ -2,6 +2,7 @@ local config = loadfile("config.lua")()
 local bot_token = "Bot " .. config.token
 local channel_id = config.channel_id
 local last_message_id = ""
+local communication = loadfile("utils/communication.lua")()
 
 _G.bot_logs = _G.bot_logs or {}
 
@@ -43,13 +44,13 @@ local function sendEmbed(title, description, reply_to_id)
 		["Authorization"] = bot_token,
 		["Content-Type"] = "application/json",
 	})
-	
+
 	if success and response then
 		response.close()
 	elseif not success then
 		print("[DISCORD] Error sending embed: " .. response)
 	end
-	
+
 	_G.bot_logs[#_G.bot_logs + 1] = { type = "embed", title = title, description = description }
 	if #_G.bot_logs > 100 then
 		table.remove(_G.bot_logs, 1)
@@ -68,13 +69,13 @@ local function sendMessage(content, reply_to_id)
 		["Authorization"] = bot_token,
 		["Content-Type"] = "application/json",
 	})
-	
+
 	if success and response then
 		response.close()
 	elseif not success then
 		print("[DISCORD] Error sending message: " .. response)
 	end
-	
+
 	_G.bot_logs[#_G.bot_logs + 1] = { type = "message", content = content }
 	if #_G.bot_logs > 100 then
 		table.remove(_G.bot_logs, 1)
@@ -93,15 +94,17 @@ local function getLatestMessage()
 	end
 
 	if response then
-		local parseSuccess, data = pcall(function() return textutils.unserializeJSON(response.readAll()) end)
+		local parseSuccess, data = pcall(function()
+			return textutils.unserializeJSON(response.readAll())
+		end)
 		response.close()
-		
+
 		if not parseSuccess then
 			print("[DISCORD] Error parsing JSON response")
 			sleep(0)
 			return nil
 		end
-		
+
 		if data and data[1] then
 			local msg = data[1]
 			if msg.id ~= last_message_id and not (msg.author and msg.author.bot) then
@@ -119,8 +122,67 @@ local function getLatestMessage()
 	return nil
 end
 
+local function beOnline()
+	local gateway_url = "wss://gateway.discord.gg/?v=10&encoding=json"
+
+	local function runBot()
+		print("Connecting to Discord Gateway...")
+
+		local ws, err = http.websocket(gateway_url)
+
+		if not ws then
+			print("Failed to connect: " .. tostring(err))
+			return
+		end
+
+		print("Connected! Handshaking...")
+
+		while true do
+			local event, url, msg = os.pullEvent()
+
+			if event == "websocket_message" then
+				local data = textutils.unserializeJSON(msg)
+
+				if data.op == 10 then
+					local heartbeat_interval = data.d.heartbeat_interval / 1000
+
+					ws.send(textutils.serializeJSON({
+						op = 2,
+						d = {
+							token = bot_token,
+							intents = 513,
+							properties = {
+								os = "linux",
+								browser = "computercraft",
+								device = "computercraft",
+							},
+						},
+					}))
+
+					os.startTimer(heartbeat_interval)
+					print("Bot is now ONLINE (Green Dot active).")
+
+				elseif data.op == 1 or event == "timer" then
+					ws.send(textutils.serializeJSON({
+						op = 1,
+						d = JSONObject,
+					}))
+					os.startTimer(heartbeat_interval or 30)
+				end
+			elseif event == "websocket_closed" then
+				print("Connection lost. Retrying...")
+				return runBot()
+			end
+		end
+	end
+
+	runBot()
+end
+
 local function runBot()
 	local prefix = "!"
+
+	parallel.waitForAny(beOnline)
 
 	while true do
 		local user, text, id = getLatestMessage()
@@ -132,16 +194,25 @@ local function runBot()
 			local command = commands[commandName]
 
 			if command and has_value(command.permissions, "discord") then
-				local success, result, msg_type = pcall(command.action, "discord", args)
-				if success then
-					if msg_type == "embed" then
-						sendEmbed(result.title, result.description, id)
-					else
-						sendMessage(result, id)
+				local commandData = {command = commandName, args = args, id = id}
+				communication.send(textutils.serialize(commandData), "discord_command")
+				
+				local responseReceived = false
+				local result
+				while not responseReceived do
+					local event, senderId, message, protocol = os.pullEvent("rednet_message")
+					if protocol == "discord_response" then
+						local responseData = textutils.unserialize(message)
+						if responseData.id == id then
+							result = responseData.response
+							if type(result) == "table" and result.title then
+								sendEmbed(result.title, result.description, id)
+							else
+								sendMessage(tostring(result), id)
+							end
+							responseReceived = true
+						end
 					end
-				else
-					print("Error in command " .. (commandName or "unknown") .. ": " .. result)
-					sendMessage("Error executing command: " .. result, id)
 				end
 			else
 				sendMessage("Unknown command. Type '!list' to see available commands.", id)
